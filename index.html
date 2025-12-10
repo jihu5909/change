@@ -1,70 +1,266 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>청주 무장애 지도 (Leaflet 버전)</title>
-
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-<style>
-  body { margin:0; padding:0; }
-  #map { width:100%; height:100vh; }
-</style>
-</head>
-<body>
-<div id="map"></div>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- PapaParse (CSV 파싱) -->
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-
-<script>
-// 지도 생성: OpenStreetMap 타일 사용
-const map = L.map('map').setView([36.63, 127.49], 12);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-}).addTo(map);
-
-// CSV 불러오기
-Papa.parse("data.csv", {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-        const data = results.data;
-        let bounds = [];
-
-        data.forEach(row => {
-            const lat = parseFloat(row.lat);
-            const lng = parseFloat(row.lng);
-            if (isNaN(lat) || isNaN(lng)) return;
-
-            const marker = L.marker([lat, lng]).addTo(map);
-
-            const html = `
-                <b>${row.name || ''}</b><br>
-                장애유형: ${row.disability_type || ''}<br>
-                접근성: ${row.accessibility || ''}<br>
-                주소: ${row.address || ''}<br>
-                전화: ${row.phone || ''}<br>
-                운영시간: ${row.opening_hours || ''}<br>
-                설명: ${row.info || ''}<br>
-            `;
-            marker.bindPopup(html);
-
-            bounds.push([lat, lng]);
-        });
-
-        if (bounds.length > 0) {
-            map.fitBounds(bounds);
-        }
-    }
-});
-</script>
-</body>
-</html>
+ <!DOCTYPE html>
+ <html lang="ko">
+   <head>
+     <meta charset="utf-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1" />
+     <title>청주시 무장애 지도</title>
+     <link
+       rel="stylesheet"
+       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+       crossorigin=""
+     />
+     <style>
+       html, body {
+         height: 100%;
+         margin: 0;
+         padding: 0;
+         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
+       }
+       .app {
+         display: flex;
+         height: 100%;
+         width: 100%;
+         overflow: hidden;
+       }
+       .sidebar {
+         display: flex;
+         flex-direction: column;
+         background: #fff;
+         border-right: 1px solid #e5e7eb;
+       }
+       .sidebar.left { width: 320px; min-width: 260px; }
+       .sidebar.right { width: 380px; min-width: 300px; border-right: none; border-left: 1px solid #e5e7eb; }
+ 
+       .sidebar-header {
+         padding: 12px 14px;
+         border-bottom: 1px solid #e5e7eb;
+         background: #f9fafb;
+         font-weight: 600;
+       }
+       .list {
+         overflow: auto;
+         flex: 1;
+       }
+       .list-item {
+         display: flex;
+         flex-direction: column;
+         gap: 4px;
+         padding: 12px 14px;
+         border-bottom: 1px solid #f1f5f9;
+         cursor: pointer;
+       }
+       .list-item:hover { background: #f8fafc; }
+       .list-item.active { background: #eef2ff; }
+       .list-title { font-weight: 600; font-size: 14px; color: #111827; }
+       .list-sub { font-size: 12px; color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ 
+       #map { flex: 1; height: 100%; }
+ 
+       .detail {
+         overflow: auto;
+         flex: 1;
+       }
+       .detail-content { padding: 14px; }
+       .detail-title { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+       .detail-row { margin: 8px 0; font-size: 14px; color: #111827; }
+       .detail-label { display: inline-block; min-width: 110px; color: #6b7280; }
+       .muted { color: #6b7280; }
+ 
+       @media (max-width: 1024px) {
+         .sidebar.left { width: 280px; }
+         .sidebar.right { display: none; }
+       }
+     </style>
+   </head>
+   <body>
+     <div class="app">
+       <aside class="sidebar left" aria-label="관광지 목록">
+         <div class="sidebar-header">관광지 목록</div>
+         <div id="placeList" class="list" role="list"></div>
+       </aside>
+ 
+       <div id="map" role="region" aria-label="지도"></div>
+ 
+       <aside class="sidebar right" aria-label="관광지 상세">
+         <div class="sidebar-header">상세 정보</div>
+         <div id="detail" class="detail">
+           <div class="detail-content muted">왼쪽 목록이나 지도 마커를 클릭하면 상세 정보가 여기에 표시됩니다.</div>
+         </div>
+       </aside>
+     </div>
+ 
+     <script
+       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+       crossorigin=""
+     ></script>
+     <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+ 
+     <script>
+       // 설정: CSV 파일 경로 (리포지토리 루트에 data.csv를 두었다고 가정)
+       const CSV_URL = 'data.csv';
+ 
+       // CSV 헤더(한글)를 상수화
+       const COL = {
+         name: '관광지명',
+         wheelchair: '휠체어이용가능여부',
+         toilet: '장애인화장실유무',
+         phone: '연락처',
+         address: '주소',
+         desc: '관광지 간단 설명',
+         lat: '위도',
+         lng: '경도',
+       };
+ 
+       // 지도 초기화 (청주 대략 중심; 이후 데이터로 bounds fit)
+       const map = L.map('map', { zoomControl: true }).setView([36.6439, 127.4886], 12);
+       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+         maxZoom: 19,
+         attribution: '&copy; OpenStreetMap 기여자'
+       }).addTo(map);
+ 
+       const markers = [];
+       const listEl = document.getElementById('placeList');
+       const detailEl = document.getElementById('detail');
+       let activeId = null;
+ 
+       function createListItem(place, id) {
+         const item = document.createElement('div');
+         item.className = 'list-item';
+         item.setAttribute('role', 'listitem');
+         item.dataset.id = id;
+ 
+         const title = document.createElement('div');
+         title.className = 'list-title';
+         title.textContent = place[COL.name] || '(이름 없음)';
+ 
+         const sub = document.createElement('div');
+         sub.className = 'list-sub';
+         const wc = place[COL.wheelchair] ? `휠체어: ${place[COL.wheelchair]}` : '';
+         const toilet = place[COL.toilet] ? `화장실: ${place[COL.toilet]}` : '';
+         const addr = place[COL.address] || '';
+         sub.textContent = [wc, toilet, addr].filter(Boolean).join(' · ');
+ 
+         item.appendChild(title);
+         item.appendChild(sub);
+         item.addEventListener('click', () => selectPlace(id, true));
+         return item;
+       }
+ 
+       function renderDetail(place) {
+         const name = place[COL.name] || '';
+         const wheelchair = place[COL.wheelchair] || '';
+         const toilet = place[COL.toilet] || '';
+         const phone = place[COL.phone] || '';
+         const address = place[COL.address] || '';
+         const desc = place[COL.desc] || '';
+ 
+         detailEl.innerHTML = `
+           <div class="detail-content">
+             <h2 class="detail-title">${escapeHtml(name)}</h2>
+             <div class="detail-row"><span class="detail-label">휠체어 이용</span>${escapeHtml(wheelchair)}</div>
+             <div class="detail-row"><span class="detail-label">장애인 화장실</span>${escapeHtml(toilet)}</div>
+             <div class="detail-row"><span class="detail-label">연락처</span>${escapeHtml(phone)}</div>
+             <div class="detail-row"><span class="detail-label">주소</span>${escapeHtml(address)}</div>
+             <div class="detail-row"><span class="detail-label">설명</span>${escapeHtml(desc)}</div>
+           </div>
+         `;
+       }
+ 
+       function escapeHtml(str) {
+         return String(str || '')
+           .replaceAll('&', '&amp;')
+           .replaceAll('<', '&lt;')
+           .replaceAll('>', '&gt;')
+           .replaceAll('"', '&quot;')
+           .replaceAll("'", '&#039;');
+       }
+ 
+       function selectPlace(id, fromList = false) {
+         const m = markers[id];
+         if (!m) return;
+ 
+         // 목록 하이라이트
+         if (activeId !== null) {
+           const prev = listEl.querySelector(`.list-item[data-id="${activeId}"]`);
+           if (prev) prev.classList.remove('active');
+         }
+         const cur = listEl.querySelector(`.list-item[data-id="${id}"]`);
+         if (cur) {
+           cur.classList.add('active');
+           cur.scrollIntoView({ block: 'nearest' });
+         }
+         activeId = id;
+ 
+         // 상세 정보 렌더
+         renderDetail(m.place);
+ 
+         // 지도 이동 및 팝업
+         const latlng = m.marker.getLatLng();
+         map.setView(latlng, Math.max(map.getZoom(), 15), { animate: true });
+         m.marker.openPopup();
+       }
+ 
+       function addMarker(place, id) {
+         const lat = parseFloat(place[COL.lat]);
+         const lng = parseFloat(place[COL.lng]);
+         if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
+ 
+         const popupHtml = `
+           <div>
+             <div style="font-weight:700;margin-bottom:4px;">${escapeHtml(place[COL.name] || '')}</div>
+             <div class="muted" style="font-size:12px;">${escapeHtml(place[COL.address] || '')}</div>
+             <div style="margin-top:6px;font-size:12px;">
+               휠체어: ${escapeHtml(place[COL.wheelchair] || '')} · 화장실: ${escapeHtml(place[COL.toilet] || '')}
+             </div>
+           </div>
+         `;
+ 
+         const marker = L.marker([lat, lng]);
+         marker.bindPopup(popupHtml);
+         marker.addTo(map);
+         marker.on('click', () => selectPlace(id));
+ 
+         return marker;
+       }
+ 
+       function loadCSV() {
+         Papa.parse(CSV_URL, {
+           download: true,
+           header: true,
+           skipEmptyLines: true,
+           complete: (res) => {
+             const data = res.data || [];
+             const bounds = L.latLngBounds();
+ 
+             data.forEach((row, idx) => {
+               const marker = addMarker(row, idx);
+               if (marker) {
+                 markers[idx] = { marker, place: row };
+                 const item = createListItem(row, idx);
+                 listEl.appendChild(item);
+                 bounds.extend(marker.getLatLng());
+               }
+             });
+ 
+             if (bounds.isValid()) {
+               map.fitBounds(bounds.pad(0.08));
+             }
+ 
+             // 처음 항목 자동 선택 (선택)
+             if (markers.length > 0) {
+               // selectPlace(0);
+             }
+           },
+           error: (err) => {
+             console.error('CSV 로드 실패:', err);
+             detailEl.innerHTML = '<div class="detail-content">data.csv 로드를 실패했습니다. 경로를 확인해 주세요.</div>';
+           }
+         });
+       }
+ 
+       loadCSV();
+     </script>
+   </body>
+ </html>
