@@ -242,7 +242,7 @@ let activeId = null;
 
 let color = DATASETS.tour.color;
 if (currentType === 'food') {
-  const t = (place['카페/식당'] || '').toString().trim();
+  const t = (place['i'] || '').toString().trim();
   if (t.includes('식당')) color = DATASETS.food.colorRestaurant;
   else color = DATASETS.food.colorCafe; // 기본값: 카페
 }
@@ -261,14 +261,15 @@ marker.on('click', () => selectPlace(id));
 return marker;
       }
 
+function clearAll() {
+  markers.forEach(m => { if (m && m.marker) { map.removeLayer(m.marker); } });
+  markers.length = 0;
+  listEl.innerHTML = '';
+  detailEl.innerHTML = '<div class="detail-content muted">왼쪽 목록이나 지도 마커를 클릭하면 상세 정보가 여기에 표시됩니다.</div>';
+  activeId = null;
+}
+
         function loadCSV() {
-        function clearAll() {
-        markers.forEach(m => { if (m && m.marker) { map.removeLayer(m.marker); } });
-        markers.length = 0;
-        listEl.innerHTML = '';
-        detailEl.innerHTML = '<div class="detail-content muted">왼쪽 목록이나 지도 마커를 클릭하면 상세 정보가 여기에 표시됩니다.</div>';
-        activeId = null;
-      }
           sidebarTitleEl.textContent = DATASETS[currentType].title;
           const url = DATASETS[currentType].url;
           Papa.parse(url, {
@@ -291,7 +292,7 @@ return marker;
 
             if (bounds.isValid()) {
               map.fitBounds(bounds.pad(0.08));
-    ㅡ       }
+              }
 
              // 처음 항목 자동 선택 (선택)
           if (markers.length > 0) {
@@ -313,23 +314,32 @@ return marker;
         tabFoodEl.setAttribute('aria-selected', String(type === 'food'));
       }
 
+      function loadTourPlaces() {
+        currentType = 'tour';
+        setActiveTab('tour');
+        clearAll();
+        loadCSV();
+      }
+
+      function loadFoodPlaces() {
+        currentType = 'food';
+        setActiveTab('food');
+        clearAll();
+        loadCSV();
+      }
+
       tabTourEl.addEventListener('click', () => {
         if (currentType !== 'tour') {
-          setActiveTab('tour');
-          clearAll();
-          loadCSV();
+          loadTourPlaces();
         }
       });
       tabFoodEl.addEventListener('click', () => {
         if (currentType !== 'food') {
-          setActiveTab('food');
-          clearAll();
-          loadCSV();
+          loadFoodPlaces();
         }
       });
 
-setActiveTab('tour');
-loadCSV();
+loadTourPlaces();
     </script>
   </body>
 </html>
