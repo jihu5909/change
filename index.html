@@ -348,14 +348,22 @@ function clearAll() {
         currentType = 'tour';
         setActiveTab('tour');
         clearAll();
-        loadCSV();
+        if (!loadedTour) {
+          loadCSV();
+        } else {
+          renderListForCurrentType();
+        }
       }
 
       function loadFoodPlaces() {
         currentType = 'food';
         setActiveTab('food');
         clearAll();
-        loadCSV();
+        if (!loadedFood) {
+          loadCSV();
+        } else {
+          renderListForCurrentType();
+        }
       }
 
       tabTourEl.addEventListener('click', () => {
