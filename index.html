@@ -296,7 +296,8 @@ let activeId = null;
         map.once('moveend', () => {
           m.marker.openPopup();
         });
-        map.flyTo(latlng, targetZoom, { animate: true });
+        // duration 기본값(약 1초)보다 짧게 설정해서 이동 속도를 빠르게 함
+        map.flyTo(latlng, targetZoom, { animate: true, duration: 0.5 });
       }
 
     function addMarker(place, id) {
