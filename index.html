@@ -81,7 +81,40 @@
 
       @media (max-width: 1024px) {
         .sidebar.left { width: 280px; }
-        .sidebar.right { display: none; }
+      }
+
+      @media (max-width: 768px) {
+        .app {
+          flex-direction: column;
+          height: auto;
+        }
+
+        .sidebar.left,
+        .sidebar.right {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .sidebar.right {
+          border-left: none;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        #map {
+          flex: 0 0 40vh;
+          height: 40vh;
+          order: 2;
+        }
+
+        .sidebar.left {
+          order: 1;
+          max-height: 40vh;
+        }
+
+        .sidebar.right {
+          order: 3;
+          max-height: 40vh;
+        }
       }
     </style>
   </head>
@@ -257,10 +290,13 @@ let activeId = null;
         // 상세 정보 렌더
         renderDetail(m.place);
 
-        // 지도 이동 및 팝업
+        // 지도 이동 및 팝업 - 선택한 장소가 항상 화면 중앙에 오도록 처리
         const latlng = m.marker.getLatLng();
-        map.setView(latlng, Math.max(map.getZoom(), 15), { animate: true });
-        m.marker.openPopup();
+        const targetZoom = Math.max(map.getZoom(), 17);
+        map.once('moveend', () => {
+          m.marker.openPopup();
+        });
+        map.flyTo(latlng, targetZoom, { animate: true });
       }
 
     function addMarker(place, id) {
@@ -300,9 +336,16 @@ function clearAll() {
   activeId = null;
 }
 
-        function loadCSV() {
-          sidebarTitleEl.textContent = DATASETS[currentType].title;
-          const url = DATASETS[currentType].url;
+        function loadCSV(type, options = {}) {
+          const { fitBounds = true, renderList = true } = options;
+          const dataset = DATASETS[type];
+          if (!dataset) return;
+
+          if (type === currentType) {
+            sidebarTitleEl.textContent = dataset.title;
+          }
+
+          const url = dataset.url;
           Papa.parse(url, {
             download: true,
             header: true,
@@ -315,19 +358,21 @@ function clearAll() {
               const id = markers.length;
               const marker = addMarker(row, id);
               if (marker) {
-                markers[id] = { marker, place: row, type: currentType };
+                markers[id] = { marker, place: row, type };
                 bounds.extend(marker.getLatLng());
               }
             });
 
-            if (bounds.isValid()) {
+            if (fitBounds && bounds.isValid()) {
               map.fitBounds(bounds.pad(0.08));
             }
 
-            if (currentType === 'tour') loadedTour = true;
-            if (currentType === 'food') loadedFood = true;
+            if (type === 'tour') loadedTour = true;
+            if (type === 'food') loadedFood = true;
 
-            renderListForCurrentType();
+            if (renderList && type === currentType) {
+              renderListForCurrentType();
+            }
           },
             error: (err) => {
             console.error('CSV 로드 실패:', err);
@@ -349,8 +394,9 @@ function clearAll() {
         setActiveTab('tour');
         clearAll();
         if (!loadedTour) {
-          loadCSV();
+          loadCSV('tour', { fitBounds: true, renderList: true });
         } else {
+          sidebarTitleEl.textContent = DATASETS['tour'].title;
           renderListForCurrentType();
         }
       }
@@ -360,8 +406,9 @@ function clearAll() {
         setActiveTab('food');
         clearAll();
         if (!loadedFood) {
-          loadCSV();
+          loadCSV('food', { fitBounds: true, renderList: true });
         } else {
+          sidebarTitleEl.textContent = DATASETS['food'].title;
           renderListForCurrentType();
         }
       }
@@ -377,7 +424,9 @@ function clearAll() {
         }
       });
 
-loadTourPlaces();
+      setActiveTab('tour');
+      loadCSV('tour', { fitBounds: true, renderList: true });
+      loadCSV('food', { fitBounds: false, renderList: false });
     </script>
   </body>
 </html>
