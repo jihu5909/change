@@ -161,15 +161,7 @@
         opacity: 1;
         pointer-events: auto;
       }
-      .splitter {
-        width: 4px;
-        background: #e5e7eb;
-        cursor: col-resize;
-        flex: 0 0 auto;
-      }
-      .splitter:hover {
-        background: #cbd5f5;
-      }
+      /* Splitter styles are now in the media query */
       .sidebar {
         display: flex;
         flex-direction: column;
@@ -280,7 +272,44 @@
         }
       }
 
-      @media (min-width: 1024px) {
+      @media (min-width: 481px) {
+        .app {
+          display: flex;
+          flex-direction: row;
+          height: 100%;
+        }
+        
+        .sidebar.left {
+          width: 300px;
+          min-width: 200px;
+          max-width: 400px;
+          height: 100%;
+          overflow-y: auto;
+        }
+        
+        .sidebar.right {
+          width: 350px;
+          min-width: 250px;
+          max-width: 450px;
+          height: 100%;
+          overflow-y: auto;
+        }
+        
+        #map {
+          flex: 1;
+          height: 100%;
+        }
+        
+        .splitter {
+          width: 4px;
+          background: #e5e7eb;
+          cursor: col-resize;
+          flex: 0 0 auto;
+        }
+        
+        .splitter:hover {
+          background: #cbd5f5;
+        }
         .landing-inner {
           display: grid;
           grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr);
