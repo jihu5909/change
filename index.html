@@ -29,7 +29,7 @@
         align-items: flex-start;
         justify-content: center;
         padding: 24px;
-        background: #f3f4f6;
+        background: #ffffff;
         overflow-y: auto;
         opacity: 1;
         transition: opacity 0.4s ease;
@@ -40,11 +40,11 @@
       }
       .landing-inner {
         width: 100%;
-        max-width: 960px;
+        max-width: 1180px;
         background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
-        padding: 32px 28px;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 32px 32px;
         box-sizing: border-box;
       }
       .landing-header {
@@ -62,8 +62,8 @@
         margin-bottom: 12px;
       }
       .landing-logo img {
-        max-width: 420px;
-        width: 80%;
+        max-width: 520px;
+        width: 90%;
         height: auto;
         border-radius: 12px;
         object-fit: contain;
@@ -160,6 +160,15 @@
       .app-visible {
         opacity: 1;
         pointer-events: auto;
+      }
+      .splitter {
+        width: 4px;
+        background: #e5e7eb;
+        cursor: col-resize;
+        flex: 0 0 auto;
+      }
+      .splitter:hover {
+        background: #cbd5f5;
       }
       .sidebar {
         display: flex;
@@ -266,6 +275,9 @@
           order: 3;
           max-height: 40vh;
         }
+        .splitter {
+          display: none;
+        }
       }
 
       @media (min-width: 1024px) {
@@ -315,6 +327,12 @@
             <h1 id="landingTitle" class="landing-title">청주시 무장애 지도 (데모)</h1>
             <p class="landing-subtitle">모두가 안전하고 편리하게 이동할 수 있는 청주를 위해, 무장애 관광·이동 정보를 한 곳에 모은 지도입니다.</p>
           </div>
+          <div class="landing-footer">
+            <button id="startButton" type="button" class="landing-button">시작하기</button>
+            <p class="landing-disclaimer">
+              <strong>주의:</strong> 이 지도는 비공식 데모 버전으로, 내용이 정확하지 않을 수 있습니다. 2025년 12월 기준으로 작성되었으며, 실제 이용 가능 여부와 상세 정보는 각 시설 및 관련 기관에 별도 문의해 주세요.
+            </p>
+          </div>
         </div>
         <div class="landing-grid">
           <div>
@@ -348,12 +366,6 @@
             </p>
           </aside>
         </div>
-        <div class="landing-footer">
-          <button id="startButton" type="button" class="landing-button">시작하기</button>
-          <p class="landing-disclaimer">
-            <strong>주의:</strong> 이 지도는 비공식 데모 버전으로, 내용이 정확하지 않을 수 있습니다. 2025년 12월 기준으로 작성되었으며, 실제 이용 가능 여부와 상세 정보는 각 시설 및 관련 기관에 별도 문의해 주세요.
-          </p>
-        </div>
       </div>
     </div>
     <div class="app">
@@ -367,8 +379,9 @@
           </div>
           <div id="placeList" class="list" role="list"></div>
         </aside>
+        <div class="splitter" id="splitterLeft" aria-hidden="true"></div>
         <div id="map" role="region" aria-label="지도"></div>
-
+        <div class="splitter" id="splitterRight" aria-hidden="true"></div>
       <aside class="sidebar right" aria-label="관광지 상세">
         <div class="sidebar-header">상세 정보</div>
         <div id="detail" class="detail">
@@ -451,6 +464,10 @@ let activeId = null;
 const landingEl = document.getElementById('landing');
 const startButtonEl = document.getElementById('startButton');
 const appEl = document.querySelector('.app');
+const leftSidebarEl = document.querySelector('.sidebar.left');
+const rightSidebarEl = document.querySelector('.sidebar.right');
+const splitterLeftEl = document.getElementById('splitterLeft');
+const splitterRightEl = document.getElementById('splitterRight');
 
 function hideLanding() {
   if (!landingEl) return;
@@ -476,6 +493,63 @@ if (startButtonEl) {
     hideLanding();
   });
 }
+
+function setupSplitter(splitterEl, side) {
+  if (!splitterEl) return;
+
+  let isDragging = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  const onMouseDown = (event) => {
+    if (window.innerWidth < 768) return; // 모바일에서는 비활성화
+    isDragging = true;
+    startX = event.clientX;
+    if (side === 'left' && leftSidebarEl) {
+      startWidth = leftSidebarEl.getBoundingClientRect().width;
+    } else if (side === 'right' && rightSidebarEl) {
+      startWidth = rightSidebarEl.getBoundingClientRect().width;
+    }
+    document.body.style.userSelect = 'none';
+  };
+
+  const onMouseMove = (event) => {
+    if (!isDragging) return;
+
+    const dx = event.clientX - startX;
+    if (side === 'left' && leftSidebarEl) {
+      let newWidth = startWidth + dx;
+      const min = 220;
+      const max = Math.min(520, window.innerWidth * 0.6);
+      newWidth = Math.max(min, Math.min(max, newWidth));
+      leftSidebarEl.style.width = `${newWidth}px`;
+    } else if (side === 'right' && rightSidebarEl) {
+      let newWidth = startWidth - dx;
+      const min = 240;
+      const max = Math.min(520, window.innerWidth * 0.6);
+      newWidth = Math.max(min, Math.min(max, newWidth));
+      rightSidebarEl.style.width = `${newWidth}px`;
+    }
+  };
+
+  const onMouseUp = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    document.body.style.userSelect = '';
+
+    // 사이드바 폭 조절 후 지도 영역 다시 계산
+    if (typeof map !== 'undefined' && map && typeof map.invalidateSize === 'function') {
+      map.invalidateSize();
+    }
+  };
+
+  splitterEl.addEventListener('mousedown', onMouseDown);
+  window.addEventListener('mousemove', onMouseMove);
+  window.addEventListener('mouseup', onMouseUp);
+}
+
+setupSplitter(splitterLeftEl, 'left');
+setupSplitter(splitterRightEl, 'right');
 
       function createListItem(place, id) {
         const item = document.createElement('div');         item.className = 'list-item';
