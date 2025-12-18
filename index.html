@@ -153,6 +153,13 @@
         height: 100%;
         width: 100%;
         overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+      }
+      .app-visible {
+        opacity: 1;
+        pointer-events: auto;
       }
       .sidebar {
         display: flex;
@@ -258,6 +265,41 @@
         .sidebar.right {
           order: 3;
           max-height: 40vh;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .landing-inner {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+          column-gap: 40px;
+          row-gap: 24px;
+          align-items: center;
+        }
+
+        .landing-header {
+          grid-column: 1 / 2;
+          grid-row: 1;
+        }
+
+        .landing-grid {
+          grid-column: 2 / 3;
+          grid-row: 1;
+        }
+
+        .landing-footer {
+          grid-column: 1 / 2;
+          grid-row: 2;
+          align-self: flex-start;
+        }
+
+        .landing-logo {
+          justify-content: flex-start;
+        }
+
+        .landing-button {
+          align-self: flex-start;
+          margin-top: 8px;
         }
       }
     </style>
@@ -408,12 +450,17 @@ let currentType = 'tour';
 let activeId = null;
 const landingEl = document.getElementById('landing');
 const startButtonEl = document.getElementById('startButton');
+const appEl = document.querySelector('.app');
 
 function hideLanding() {
   if (!landingEl) return;
 
   landingEl.classList.add('landing-hidden');
   landingEl.setAttribute('aria-hidden', 'true');
+
+  if (appEl) {
+    appEl.classList.add('app-visible');
+  }
 
   const handleTransitionEnd = (event) => {
     if (event.propertyName !== 'opacity') return;
