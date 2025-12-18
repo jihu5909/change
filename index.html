@@ -99,59 +99,6 @@
         text-decoration: underline;
         text-underline-offset: 2px;
       }
-      .landing-disclaimer a {
-        color: #2563eb;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-      }
-
-      /* Mobile menu button */
-      .mobile-menu-button {
-        display: none;
-        position: fixed;
-        top: 12px;
-        left: 12px;
-        z-index: 1001;
-        background: #3b82f6;
-        border: none;
-        border-radius: 4px;
-        width: 44px;
-        height: 44px;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 5px;
-        padding: 8px;
-        cursor: pointer;
-      }
-
-      .mobile-menu-button span {
-        display: block;
-        width: 20px;
-        height: 2px;
-        background: white;
-        transition: all 0.3s ease;
-      }
-
-      /* Mobile close button */
-      .mobile-close-button {
-        display: none;
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        z-index: 1002;
-        background: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
-        font-size: 20px;
-        line-height: 1;
-        cursor: pointer;
-        justify-content: center;
-        align-items: center;
-      }
       .landing-aside {
         font-size: 13px;
         line-height: 1.8;
@@ -224,28 +171,10 @@
         background: #cbd5f5;
       }
       .sidebar {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        width: 85%;
-        max-width: 320px;
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-        transform: translateX(-100%);
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-        background: #ffffff;
-        overflow-y: auto;
-      }
-      .sidebar.visible {
-        transform: translateX(0);
-      }
-      .sidebar.right {
-        right: 0;
-        left: auto;
-        transform: translateX(100%);
-      }
-      .sidebar.right.visible {
-        transform: translateX(0);
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border-right: 1px solid #e5e7eb;
       }
       .sidebar.left { width: 320px; min-width: 260px; }
       .sidebar.right { width: 380px; min-width: 300px; border-right: none; border-left: 1px solid #e5e7eb; }
@@ -349,33 +278,6 @@
         .splitter {
           display: none;
         }
-        .mobile-menu-button {
-          display: flex;
-        }
-        
-        .mobile-close-button {
-          display: flex;
-        }
-        
-        .app {
-          grid-template-columns: 1fr;
-          grid-template-rows: 1fr;
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .sidebar {
-          width: 85%;
-          max-width: 320px;
-        }
-        
-        .sidebar.left {
-          transform: translateX(-100%);
-        }
-        
-        .sidebar.right {
-          transform: translateX(100%);
-        }
       }
 
       @media (min-width: 1024px) {
@@ -468,14 +370,8 @@
         </div>
       </div>
     </div>
-    <button id="mobileMenuButton" class="mobile-menu-button" aria-label="메뉴 열기">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-<div class="app">
+    <div class="app">
         <aside class="sidebar left" aria-label="목록">
-        <button class="mobile-close-button" id="closeLeftMenu" aria-label="메뉴 닫기">×</button>
           <div class="sidebar-header">
             <div class="tabs" role="tablist" aria-label="데이터셋 선택">
               <button id="tabTour" class="tab active" role="tab" aria-selected="true">관광지</button>
@@ -489,7 +385,6 @@
         <div id="map" role="region" aria-label="지도"></div>
         <div class="splitter" id="splitterRight" aria-hidden="true"></div>
       <aside class="sidebar right" aria-label="관광지 상세">
-        <button class="mobile-close-button" id="closeRightMenu" aria-label="상세 정보 닫기">×</button>
         <div class="sidebar-header">상세 정보</div>
         <div id="detail" class="detail">
           <div class="detail-content muted">왼쪽 목록이나 지도 마커를 클릭하면 상세 정보가 여기에 표시됩니다.</div>
@@ -874,77 +769,6 @@ function clearAll() {
       setActiveTab('tour');
       loadCSV('tour', { fitBounds: true, renderList: true });
       loadCSV('food', { fitBounds: false, renderList: false });
-
-      // Mobile sidebar functionality
-      const mobileMenuButton = document.getElementById('mobileMenuButton');
-      const closeLeftMenu = document.getElementById('closeLeftMenu');
-      const closeRightMenu = document.getElementById('closeRightMenu');
-      const leftSidebar = document.querySelector('.sidebar.left');
-      const rightSidebar = document.querySelector('.sidebar.right');
-
-      // Toggle sidebar visibility
-      function toggleSidebar(sidebar, show) {
-        if (!sidebar) return;
-        
-        if (show) {
-          sidebar.classList.add('visible');
-          document.body.style.overflow = 'hidden';
-        } else {
-          sidebar.classList.remove('visible');
-          document.body.style.overflow = '';
-        }
-      }
-
-      // Event listeners for mobile menu buttons
-      if (mobileMenuButton) {
-        mobileMenuButton.addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleSidebar(leftSidebar, true);
-        });
-      }
-
-      if (closeLeftMenu) {
-        closeLeftMenu.addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleSidebar(leftSidebar, false);
-        });
-      }
-
-      if (closeRightMenu) {
-        closeRightMenu.addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleSidebar(rightSidebar, false);
-        });
-      }
-
-      // Close sidebar when clicking outside
-      document.addEventListener('click', (e) => {
-        if (leftSidebar && !leftSidebar.contains(e.target) && e.target !== mobileMenuButton) {
-          toggleSidebar(leftSidebar, false);
-        }
-        if (rightSidebar && !rightSidebar.contains(e.target)) {
-          toggleSidebar(rightSidebar, false);
-        }
-      });
-
-      // Prevent event propagation on sidebar clicks
-      [leftSidebar, rightSidebar].forEach(sidebar => {
-        if (sidebar) {
-          sidebar.addEventListener('click', (e) => {
-            e.stopPropagation();
-          });
-        }
-      });
-
-      // Update selectPlace to handle mobile
-      const originalSelectPlace = selectPlace;
-      selectPlace = function(id, fromList = false) {
-        originalSelectPlace(id, fromList);
-        // On mobile, show the right sidebar when selecting a place
-        if (window.innerWidth <= 768 && rightSidebar) {
-          toggleSidebar(rightSidebar, true);
-        }
-      };
     </script>
   </body>
 </html>
