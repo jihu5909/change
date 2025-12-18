@@ -17,6 +17,137 @@
         padding: 0;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', Arial, sans-serif;
       }
+      body {
+        background: #f3f4f6;
+        color: #111827;
+      }
+      .landing {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: #f3f4f6;
+        overflow-y: auto;
+        opacity: 1;
+        transition: opacity 0.4s ease;
+      }
+      .landing-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .landing-inner {
+        width: 100%;
+        max-width: 960px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+        padding: 32px 28px;
+        box-sizing: border-box;
+      }
+      .landing-header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .landing-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      .landing-logo img {
+        max-width: 360px;
+        width: 70%;
+        height: auto;
+        border-radius: 12px;
+        object-fit: contain;
+      }
+      .landing-title {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+      .landing-subtitle {
+        font-size: 14px;
+        color: #4b5563;
+      }
+      .landing-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+        gap: 32px;
+        align-items: flex-start;
+      }
+      .landing-section-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .landing-section-text {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #374151;
+        margin-bottom: 16px;
+      }
+      .landing-section-text a {
+        color: #2563eb;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .landing-aside {
+        font-size: 13px;
+        line-height: 1.8;
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 16px 18px;
+        border: 1px solid #e5e7eb;
+      }
+      .landing-aside-title {
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .landing-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      .landing-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
+        border-radius: 999px;
+        border: none;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+        transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+      }
+      .landing-button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.45);
+      }
+      .landing-button:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.35);
+      }
+      .landing-disclaimer {
+        font-size: 12px;
+        color: #6b7280;
+      }
+      .landing-disclaimer strong {
+        font-weight: 700;
+      }
       .app {
         display: flex;
         height: 100%;
@@ -84,6 +215,19 @@
       }
 
       @media (max-width: 768px) {
+        .landing-inner {
+          padding: 24px 18px;
+        }
+        .landing-grid {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 20px;
+        }
+        .landing-title {
+          font-size: 20px;
+        }
+        .landing-subtitle {
+          font-size: 13px;
+        }
         .app {
           flex-direction: column;
           height: auto;
@@ -119,6 +263,57 @@
     </style>
   </head>
   <body>
+    <div id="landing" class="landing" role="dialog" aria-modal="true" aria-labelledby="landingTitle">
+      <div class="landing-inner">
+        <div class="landing-header">
+          <div class="landing-logo" aria-hidden="true">
+            <img src="logo.png" alt="청주시 무장애 지도 로고" />
+          </div>
+          <div>
+            <h1 id="landingTitle" class="landing-title">청주시 무장애 지도 (데모)</h1>
+            <p class="landing-subtitle">모두가 안전하고 편리하게 이동할 수 있는 청주를 위해, 무장애 관광·이동 정보를 한 곳에 모은 지도입니다.</p>
+          </div>
+        </div>
+        <div class="landing-grid">
+          <div>
+            <div class="landing-section">
+              <div class="landing-section-title">배리어프리란?</div>
+              <p class="landing-section-text">
+                장벽(Barrier)과 자유로움(Free)의 합성어로, 장애인, 고령자, 임산부 등 사회적 약자들이 사회생활을 하는 데 지장이 되는 물리적, 제도적, 심리적 장벽을 제거하여 모두가 편리하게 살아갈 수 있도록 하자는 운동 및 정책을 의미합니다.
+              </p>
+            </div>
+            <div class="landing-section">
+              <div class="landing-section-title">열린관광지란?</div>
+              <p class="landing-section-text">
+                장애인, 고령자, 영유아 동반 가족 등 모든 관광객이 이동의 불편 및 관광활동의 제약 없이 이용할 수 있는 장애물 없는 관광지입니다.
+                (<a href="https://docs.google.com/spreadsheets/d/1SvFnXkrEzXcG_Zg3bJR5r0IUGSL0Dh1YUw2wjflyudY/edit?usp=sharing" target="_blank" rel="noopener noreferrer">열린관광 : 모두의 여행</a>)
+              </p>
+            </div>
+            <div class="landing-section">
+              <div class="landing-section-title">무장애 지도란?</div>
+              <p class="landing-section-text">
+                휠체어 이용자, 유모차를 동반한 부모, 노약자 등 이동에 제약이 있는 사람들(교통약자)이 안전하고 편리하게 다닐 수 있도록 만든 맞춤형 지도입니다.
+                (<a href="https://www.kbedu.or.kr/ud/index.html" target="_blank" rel="noopener noreferrer">우리동네 무장애지도</a>)
+              </p>
+            </div>
+          </div>
+          <aside class="landing-aside" aria-label="참고 정보">
+            <div class="landing-aside-title">청주시 무장애 도시 조성 조례</div>
+            <p>
+              청주시의 무장애 도시 조성에 관한 자세한 내용은 아래 링크에서 확인하실 수 있습니다.
+              <br />
+              <a href="https://www.elis.go.kr/allalr/selectAlrBdtOne?alrNo=43990207342020&histNo=001" target="_blank" rel="noopener noreferrer">조례 전문 보기</a>
+            </p>
+          </aside>
+        </div>
+        <div class="landing-footer">
+          <button id="startButton" type="button" class="landing-button">시작하기</button>
+          <p class="landing-disclaimer">
+            <strong>주의:</strong> 이 지도는 비공식 데모 버전으로, 내용이 정확하지 않을 수 있습니다. 2025년 12월 기준으로 작성되었으며, 실제 이용 가능 여부와 상세 정보는 각 시설 및 관련 기관에 별도 문의해 주세요.
+          </p>
+        </div>
+      </div>
+    </div>
     <div class="app">
         <aside class="sidebar left" aria-label="목록">
           <div class="sidebar-header">
@@ -211,6 +406,29 @@ const tabTourEl = document.getElementById('tabTour');
 const tabFoodEl = document.getElementById('tabFood');
 let currentType = 'tour';
 let activeId = null;
+const landingEl = document.getElementById('landing');
+const startButtonEl = document.getElementById('startButton');
+
+function hideLanding() {
+  if (!landingEl) return;
+
+  landingEl.classList.add('landing-hidden');
+  landingEl.setAttribute('aria-hidden', 'true');
+
+  const handleTransitionEnd = (event) => {
+    if (event.propertyName !== 'opacity') return;
+    landingEl.style.display = 'none';
+    landingEl.removeEventListener('transitionend', handleTransitionEnd);
+  };
+
+  landingEl.addEventListener('transitionend', handleTransitionEnd);
+}
+
+if (startButtonEl) {
+  startButtonEl.addEventListener('click', () => {
+    hideLanding();
+  });
+}
 
       function createListItem(place, id) {
         const item = document.createElement('div');         item.className = 'list-item';
