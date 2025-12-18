@@ -26,7 +26,7 @@
         inset: 0;
         z-index: 50;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         padding: 24px;
         background: #f3f4f6;
@@ -62,8 +62,8 @@
         margin-bottom: 12px;
       }
       .landing-logo img {
-        max-width: 360px;
-        width: 70%;
+        max-width: 420px;
+        width: 80%;
         height: auto;
         border-radius: 12px;
         object-fit: contain;
@@ -80,7 +80,7 @@
       .landing-grid {
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
-        gap: 32px;
+        gap: 24px;
         align-items: flex-start;
       }
       .landing-section-title {
@@ -271,10 +271,10 @@
       @media (min-width: 1024px) {
         .landing-inner {
           display: grid;
-          grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
-          column-gap: 40px;
+          grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr);
+          column-gap: 20px;
           row-gap: 24px;
-          align-items: center;
+          align-items: flex-start;
         }
 
         .landing-header {
